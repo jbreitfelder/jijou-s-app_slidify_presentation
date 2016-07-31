@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Jijou's app</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Jijou's app">
+  <meta name="author" content="Joanne Breitfelder">
+  <meta name="generator" content="slidify" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/default.css" media="all" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/phone.css" 
+    media="only screen and (max-device-width: 480px)" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/slidify.css" >
+  <link rel="stylesheet" href="libraries/highlighters/highlight.js/css/tomorrow.css" />
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->  <link rel=stylesheet href="libraries/widgets/quiz/css/demo.css"></link>
+<link rel=stylesheet href="libraries/widgets/bootstrap/css/bootstrap.css"></link>
+<link rel=stylesheet href="./assets/css/ribbons.css"></link>
+
+  
+  <!-- Grab CDN jQuery, fall back to local if offline -->
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+  <script>window.jQuery || document.write('<script src="libraries/widgets/quiz/js/jquery.js"><\/script>')</script> 
+  <script data-main="libraries/frameworks/io2012/js/slides" 
+    src="libraries/frameworks/io2012/js/require-1.0.8.min.js">
+  </script>
+  
+  
+
+</head>
+<body style="opacity: 0">
+  <slides class="layout-widescreen">
+    
+    <!-- LOGO SLIDE -->
+        <slide class="title-slide segue nobackground">
+  <hgroup class="auto-fadein">
+    <h1>Jijou's app</h1>
+    <h2>Find interesting places around you!</h2>
+    <p>Joanne Breitfelder<br/>Data Scientist</p>
+  </hgroup>
+  <article></article>  
+</slide>
+    
+
+    <!-- SLIDES -->
+    <slide class="" id="slide-1" style="background:;">
+  <hgroup>
+    <h2>Presentation of the application</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>Jijou&#39;s app allows you to find interesting places around you. Looking for a good pizzeria, an aquarium, or the closest dentist? This app is for you! :) </p>
+
+<p><img src="appli.pdf" title="plot of chunk unnamed-chunk-1" alt="plot of chunk unnamed-chunk-1" width="1000" /></p>
+
+<ul>
+<li><em>En tant qu&#39;utilisateurs on est conquis!</em>
+<strong>Mélanie, France</strong></li>
+<li><em>On aime beaucoup le design, le retour à la simplicité!</em>
+<strong>Damien, France</strong></li>
+<li><em>Súper chévere y facil de usar! Aunque no encontré la pizzeria al lado de mi casa..</em> 
+<strong>Juan, Brazil</strong><br></li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-2" style="background:;">
+  <hgroup>
+    <h2>General information</h2>
+  </hgroup>
+  <article data-timings="">
+    <ul>
+<li><strong>The application:</strong> <a href="https://jijou.shinyapps.io/Jijou-s-app/">https://jijou.shinyapps.io/Jijou-s-app/</a></li>
+<li><strong>My Github repository:</strong> <a href="https://github.com/jbreitfelder/Jijou-s-app">https://github.com/jbreitfelder/Jijou-s-app</a></li>
+<li>This application is based on <a href="http://shiny.rstudio.com">RStudio&#39;s Shiny</a> and <a href="https://developers.google.com/maps/">Google Maps API</a>.</li>
+</ul>
+
+<p><img src="logos.pdf" title="plot of chunk unnamed-chunk-2" alt="plot of chunk unnamed-chunk-2" width="600" /></p>
+
+<h3>How to use the app?</h3>
+
+<ul>
+<li>Enter the kind of place you are looking for.</li>
+<li>Enter your location</li>
+<li>Choose the radius in which you want to look for </li>
+<li>Adjust the map zoom: from 3 (continent) to 21 (building).</li>
+<li>Actualize and enjoy! :)<br></li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-3" style="background:;">
+  <hgroup>
+    <h2>Geocoding with Google Maps</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>The application is based on 2 functions using Google Maps API. The first one, <code>geoCode()</code>, allows to find the GPS coordinates of a given place. I found this function <a href="https://gist.github.com/josecarlosgonz/6417633">here</a>.</p>
+
+<h3>Utilisation example:</h3>
+
+<pre><code class="r">geoCode(&quot;Paris, France&quot;)
+</code></pre>
+
+<pre><code>## [1] &quot;48.856614&quot;     &quot;2.3522219&quot;     &quot;APPROXIMATE&quot;   &quot;Paris, France&quot;
+</code></pre>
+
+<h3>Explanation of the result:</h3>
+
+<p>The first two items are the <strong>latitude</strong> and <strong>longitude</strong> coordinates, the third item is the <strong>location type</strong> (&quot;ROOFTOP&quot;, &quot;RANGE_INTERPOLATED&quot;, &quot;GEOMETRIC_CENTER&quot; or &quot;APPROXIMATE&quot;) and the last one is the <strong>formatted address</strong>.</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-4" style="background:;">
+  <hgroup>
+    <h2>Finding places of interest with Google Maps API</h2>
+  </hgroup>
+  <article data-timings="">
+    <p>The second function, <code>close_places()</code> returns the 20 closest places of interest around a given position. </p>
+
+<h3>Utilisation example :</h3>
+
+<pre><code class="r">results &lt;- close_places(&quot;Johns Hopkins University&quot;, 1000, &quot;school&quot;)
+kable(head(results, 3))
+</code></pre>
+
+<table><thead>
+<tr>
+<th align="left">icon</th>
+<th align="right">rating</th>
+<th align="left">address</th>
+<th align="left">open_now</th>
+<th align="left">name</th>
+<th align="right">idx</th>
+<th align="right">lat</th>
+<th align="right">long</th>
+</tr>
+</thead><tbody>
+<tr>
+<td align="left"><img src='https://maps.gstatic.com/mapfiles/place_api/icons/generic_business-71.png' width='50'></img></td>
+<td align="right">4.128571</td>
+<td align="left">701 East 34th Street, Baltimore</td>
+<td align="left">No information</td>
+<td align="left">Baltimore City School District</td>
+<td align="right">1</td>
+<td align="right">39.32977</td>
+<td align="right">-76.60625</td>
+</tr>
+<tr>
+<td align="left"><img src='https://maps.gstatic.com/mapfiles/place_api/icons/school-71.png' width='50'></img></td>
+<td align="right">4.500000</td>
+<td align="left">1300 Gorsuch Avenue #2, Baltimore</td>
+<td align="left">No information</td>
+<td align="left">The Stadium School</td>
+<td align="right">2</td>
+<td align="right">39.32493</td>
+<td align="right">-76.59945</td>
+</tr>
+<tr>
+<td align="left"><img src='https://maps.gstatic.com/mapfiles/place_api/icons/school-71.png' width='50'></img></td>
+<td align="right">4.100000</td>
+<td align="left">3400 Ellerslie Avenue, Baltimore</td>
+<td align="left">No information</td>
+<td align="left">Waverly Elementary School</td>
+<td align="right">3</td>
+<td align="right">39.33004</td>
+<td align="right">-76.60363</td>
+</tr>
+</tbody></table>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+    <slide class="backdrop"></slide>
+  </slides>
+  <div class="pagination pagination-small" id='io2012-ptoc' style="display:none;">
+    <ul>
+      <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=1 title='Presentation of the application'>
+         1
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=2 title='General information'>
+         2
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=3 title='Geocoding with Google Maps'>
+         3
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=4 title='Finding places of interest with Google Maps API'>
+         4
+      </a>
+    </li>
+  </ul>
+  </div>  <!--[if IE]>
+    <script 
+      src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js">  
+    </script>
+    <script>CFInstall.check({mode: 'overlay'});</script>
+  <![endif]-->
+</body>
+  <!-- Load Javascripts for Widgets -->
+  <script src="libraries/widgets/quiz/js/jquery.quiz.js"></script>
+<script src="libraries/widgets/quiz/js/mustache.min.js"></script>
+<script src="libraries/widgets/quiz/js/quiz-app.js"></script>
+<script src="libraries/widgets/bootstrap/js/bootstrap.min.js"></script>
+<script src="libraries/widgets/bootstrap/js/bootbox.min.js"></script>
+
+  <!-- MathJax: Fall back to local if CDN offline but local image fonts are not supported (saves >100MB) -->
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        processEscapes: true
+      }
+    });
+  </script>
+  <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <!-- <script src="https://c328740.ssl.cf1.rackcdn.com/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script> -->
+  <script>window.MathJax || document.write('<script type="text/x-mathjax-config">MathJax.Hub.Config({"HTML-CSS":{imageFont:null}});<\/script><script src="libraries/widgets/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"><\/script>')
+</script>
+<script>  
+  $(function (){ 
+    $("#example").popover(); 
+    $("[rel='tooltip']").tooltip(); 
+  });  
+  </script>  
+  <!-- LOAD HIGHLIGHTER JS FILES -->
+  <script src="libraries/highlighters/highlight.js/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <!-- DONE LOADING HIGHLIGHTER JS FILES -->
+   
+  </html>

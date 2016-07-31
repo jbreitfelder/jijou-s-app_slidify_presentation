@@ -1,0 +1,154 @@
+---
+title       : Jijou's app
+subtitle    : Find interesting places around you!
+author      : Joanne Breitfelder
+job         : Data Scientist
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : [mathjax, quiz, bootstrap]           
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+
+--- 
+## Presentation of the application 
+
+Jijou's app allows you to find interesting places around you. Looking for a good pizzeria, an aquarium, or the closest dentist? This app is for you! :) 
+
+```{r, out.width=1000, echo=FALSE, message=FALSE, warning=FALSE}
+library(knitr)
+include_graphics("appli.pdf")
+```  
+
+- *En tant qu'utilisateurs on est conquis!*
+**Mélanie, France**
+- *On aime beaucoup le design, le retour à la simplicité!*
+**Damien, France**
+- *Súper chévere y facil de usar! Aunque no encontré la pizzeria al lado de mi casa..* 
+**Juan, Brazil**  
+
+--- 
+## General information 
+
+- **The application:** <https://jijou.shinyapps.io/Jijou-s-app/>
+- **My Github repository:** <https://github.com/jbreitfelder/Jijou-s-app>
+- This application is based on [RStudio's Shiny](http://shiny.rstudio.com) and [Google Maps API](https://developers.google.com/maps/).
+
+```{r, out.width=600, echo=FALSE, message=FALSE, warning=FALSE}
+library(knitr)
+include_graphics("logos.pdf")
+```  
+
+### How to use the app?
+
+- Enter the kind of place you are looking for.
+- Enter your location
+- Choose the radius in which you want to look for 
+- Adjust the map zoom: from 3 (continent) to 21 (building).
+- Actualize and enjoy! :)  
+
+---
+## Geocoding with Google Maps
+
+The application is based on 2 functions using Google Maps API. The first one, `geoCode()`, allows to find the GPS coordinates of a given place. I found this function [here](https://gist.github.com/josecarlosgonz/6417633).
+
+### Utilisation example:
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(shiny)
+library(RCurl)
+library(jsonlite)
+library(plyr)
+library(ggmap)
+library(curl)
+
+url <- function(address, return.call="json", sensor="false") {
+        root <- "http://maps.google.com/maps/api/geocode/"
+        u <- paste(root, return.call, "?address=", 
+                   address, "&sensor=", sensor, sep="")
+        return(URLencode(u))
+}
+
+geoCode <- function(address) {
+        u <- url(address)
+        doc <- getURL(u)
+        x <- fromJSON(doc, simplifyVector=FALSE)
+        if(x$status=="OK") {
+                lat <- x$results[[1]]$geometry$location$lat
+                lng <- x$results[[1]]$geometry$location$lng
+                location_type <- x$results[[1]]$geometry$location_type
+                formatted_address <- x$results[[1]]$formatted_address
+                return(c(lat, lng, location_type, formatted_address))
+        } else {
+                return(c(NA, NA, NA, NA))
+        }
+}
+```
+
+```{r}
+geoCode("Paris, France")
+```
+
+### Explanation of the result:
+
+The first two items are the **latitude** and **longitude** coordinates, the third item is the **location type** ("ROOFTOP", "RANGE_INTERPOLATED", "GEOMETRIC_CENTER" or "APPROXIMATE") and the last one is the **formatted address**.
+
+---
+## Finding places of interest with Google Maps API
+
+The second function, `close_places()` returns the 20 closest places of interest around a given position. 
+
+### Utilisation example :
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+close_places <- function(location, radius, place){ 
+        
+        ## Coordinates of the location
+        coord <- geoCode(location)
+        coord <- paste(as.character(round(as.numeric(coord[1]), 5)), 
+                       as.character(round(as.numeric(coord[2]), 5)), sep=",")
+        
+        ## Creation of the URL
+        baseurl<-"https://maps.googleapis.com/maps/api/place/nearbysearch/json?"
+        google_key <- "AIzaSyD-8mknrSyCYh0Feg5PgGmq8gFIh3GINJo"
+        newurl <- paste(baseurl,"location=", coord,
+                        "&radius=", radius,
+                        "&name=", place,
+                        "&key=", google_key, sep="")
+        
+        ## Results
+        final <- fromJSON(newurl, simplifyVector=TRUE)
+        final <- final$results
+        
+        if("opening_hours" %in% names(final)){
+                if("open_now" %in% names(final$opening_hours)){
+                        open_now <- ifelse(is.na(final$opening_hours$open_now), "No information",
+                                         ifelse(final$opening_hours$open_now==FALSE,
+                                                "Closed :(", "Open :)"))
+                }
+        } else {
+                open_now <- rep("No information", length(final$name))
+        }
+        
+        rating <- ifelse(is.na(final$rating), mean(final$rating, na.rm=TRUE),
+                         final$rating)
+        
+        icon <- paste("<img src='", final$icon, "' width='50'></img>", sep="")
+        
+        details <- data.frame(icon=icon,
+                              rating=rating,
+                              address=final$vicinity,
+                              open_now=open_now,
+                              name=final$name,
+                              idx=1:length(final$geometry$location$lat),
+                              lat=final$geometry$location$lat,
+                              long=final$geometry$location$lng)
+        
+        return(details)
+}
+```
+
+```{r}
+results <- close_places("Johns Hopkins University", 1000, "school")
+kable(head(results, 3))
+```
